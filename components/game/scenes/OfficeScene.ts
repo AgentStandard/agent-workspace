@@ -265,10 +265,7 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private resumeCameraFollow() {
-    if (!this.cameraFollowing) {
-      this.cameras.main.startFollow(this.player.sprite, true, CAMERA_LERP, CAMERA_LERP);
-      this.cameraFollowing = true;
-    }
+    // No-op — overview camera, no follow in workspace mode
   }
 
   /** Recalculate camera bounds so the map is centered when viewport > map at current zoom. */
@@ -393,15 +390,8 @@ export class OfficeScene extends Phaser.Scene {
     let minDist = Infinity;
 
     for (const worker of this.workers) {
-      if (!worker.canInteract()) continue;
-      const dist = Phaser.Math.Distance.Between(
-        this.player.sprite.x, this.player.sprite.y,
-        worker.sprite.x, worker.sprite.y,
-      );
-      if (dist < INTERACT_DISTANCE && dist < minDist) {
-        minDist = dist;
-        nearest = worker;
-      }
+      // No player in workspace mode — interaction proximity unused
+      void worker;
     }
     return nearest;
   }
@@ -616,19 +606,13 @@ export class OfficeScene extends Phaser.Scene {
     const threshold = 60;
     for (const door of this.doors) {
       let near = false;
-      const dx = this.player.sprite.x - door.x;
-      const dy = this.player.sprite.y - door.y;
-      if (dx * dx + dy * dy < threshold * threshold) {
-        near = true;
-      }
-      if (!near) {
-        for (const w of this.workers) {
-          const wx = w.sprite.x - door.x;
-          const wy = w.sprite.y - door.y;
-          if (wx * wx + wy * wy < threshold * threshold) {
-            near = true;
-            break;
-          }
+      // No player — check only workers
+      for (const w of this.workers) {
+        const wx = w.sprite.x - door.x;
+        const wy = w.sprite.y - door.y;
+        if (wx * wx + wy * wy < threshold * threshold) {
+          near = true;
+          break;
         }
       }
       if (near && !door.open) {
