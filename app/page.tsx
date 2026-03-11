@@ -17,10 +17,10 @@ export default function Page() {
       <StudioProvider>
         <main
           className="relative w-screen h-screen overflow-hidden"
-          style={{ background: "var(--pixel-bg)" }}
+          style={{ background: "var(--pixel-bg)", width: "100vw", height: "100vh", position: "fixed", inset: 0 }}
         >
-          {/* Game canvas — full screen background */}
-          <div className="absolute inset-0">
+          {/* Game canvas — full screen background, explicit dimensions so Phaser.Scale.RESIZE works */}
+          <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
             <PhaserGame />
           </div>
           {/* HUD overlay — floating UI on top */}
