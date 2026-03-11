@@ -662,22 +662,5 @@ export class OfficeScene extends Phaser.Scene {
   update() {
     for (const worker of this.workers) worker.update();
     this.updateDoors();
-    // stub to silence TS — dead code below never executes
-    if (false) {
-      const dist = Phaser.Math.Distance.Between(
-        this.player.sprite.x, this.player.sprite.y,
-        this.terminalZone.x, this.terminalZone.y,
-      );
-      const near = dist < BOSS_INTERACT_DISTANCE;
-      this.promptText.setVisible(near);
-
-      if (near && Phaser.Input.Keyboard.JustDown(this.eKey)) {
-        this.terminalOpen = true;
-        this.promptText.setVisible(false);
-        gameEvents.emit("open-terminal");
-      }
-    } else if (this.promptText) {
-      this.promptText.setVisible(false);
-    }
   }
 }
