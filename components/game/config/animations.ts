@@ -47,15 +47,14 @@ export interface WorkerSpriteConfig {
  * sprite sheets. Pulse reuses char_04 with a distinct coral tint.
  */
 export const WORKER_SPRITES: WorkerSpriteConfig[] = [
-  { key: "character_01", path: "/characters/Premade_Character_48x48_01.png", label: "Aspera",   tint: 0x7BA7BC, role: "coordinator"    },
-  { key: "character_02", path: "/characters/Premade_Character_48x48_02.png", label: "Griffin",  tint: 0xC8A060, role: "credit research" },
-  { key: "character_03", path: "/characters/Premade_Character_48x48_03.png", label: "Harper",   tint: 0xE87080, role: "PA & inbox"      },
-  { key: "character_04", path: "/characters/Premade_Character_48x48_04.png", label: "Sigma",    tint: 0x50C878, role: "quant"           },
-  { key: "character_05", path: "/characters/Premade_Character_48x48_05.png", label: "Atlas",    tint: 0x8899AA, role: "portfolio"       },
-  { key: "character_06", path: "/characters/Premade_Character_48x48_06.png", label: "Vega",     tint: 0x9B7FD4, role: "strategy"        },
-  { key: "character_09", path: "/characters/Premade_Character_48x48_09.png", label: "Meridian", tint: 0x5080C8, role: "briefing"        },
-  // Pulse reuses char_04 with a distinct coral tint
-  { key: "character_04_pulse", path: "/characters/Premade_Character_48x48_04.png", label: "Pulse", tint: 0xFF7060, role: "social"       },
+  { key: "character_01", path: "/characters/Premade_Character_48x48_01.png", label: "Aspera",   tint: 0xCCEEFF, role: "coordinator"    }, // star-white celestial
+  { key: "character_02", path: "/characters/Premade_Character_48x48_02.png", label: "Griffin",  tint: 0xFFCC44, role: "credit research" }, // amber fire-being
+  { key: "character_03", path: "/characters/Premade_Character_48x48_03.png", label: "Harper",   tint: 0xFF88BB, role: "PA & inbox"      }, // rose crystal
+  { key: "character_04", path: "/characters/Premade_Character_48x48_04.png", label: "Sigma",    tint: 0x44FF99, role: "quant"           }, // neon bioluminescent
+  { key: "character_05", path: "/characters/Premade_Character_48x48_05.png", label: "Atlas",    tint: 0x99BBDD, role: "portfolio"       }, // cold slate monolith
+  { key: "character_06", path: "/characters/Premade_Character_48x48_06.png", label: "Vega",     tint: 0xDD88FF, role: "strategy"        }, // violet nebula
+  { key: "character_09", path: "/characters/Premade_Character_48x48_09.png", label: "Meridian", tint: 0x5566EE, role: "briefing"        }, // deep indigo void
+  { key: "character_04_pulse", path: "/characters/Premade_Character_48x48_04.png", label: "Pulse", tint: 0xFF5533, role: "social"       }, // hot coral plasma
 ];
 
 const directions = ["right", "up", "left", "down"] as const;

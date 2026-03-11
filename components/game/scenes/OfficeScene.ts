@@ -165,25 +165,23 @@ export class OfficeScene extends Phaser.Scene {
     this.pathfinder = new Pathfinder(map.widthInPixels, map.heightInPixels, collisionRects, PF_PADDING);
 
     const { bossSpawn, workerSpawns } = parseSpawns(map);
-    this.seatDefs = workerSpawns;
+    // Treat boss spawn as 8th agent seat so all 8 agents have a position
+    const allSpawns = [...workerSpawns, { ...bossSpawn, seatId: "seat-boss", index: workerSpawns.length }];
+    this.seatDefs = allSpawns;
 
-    this.player = new Player(this, bossSpawn.x, bossSpawn.y, bossSpawn.facing);
-    this.physics.add.collider(this.player.sprite, this.collisionGroup);
-
+    // No player character — pure overview workspace mode
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.player.sprite.setCollideWorldBounds(true);
-
-    this.input.keyboard?.disableGlobalCapture();
 
     this.mapWidth = map.widthInPixels;
     this.mapHeight = map.heightInPixels;
 
     const cam = this.cameras.main;
-    cam.setBackgroundColor("#1a1814");
+    cam.setBackgroundColor("#0d1117");
     cam.setRoundPixels(true);
-    cam.setZoom(ZOOM_DEFAULT);
+    // Zoom out to show full office
+    cam.setZoom(0.75);
+    cam.centerOn(map.widthInPixels / 2, map.heightInPixels / 2);
     this.updateCameraBounds();
-    cam.startFollow(this.player.sprite, true, CAMERA_LERP, CAMERA_LERP);
 
     this.scale.on("resize", () => this.updateCameraBounds());
 
@@ -217,10 +215,8 @@ export class OfficeScene extends Phaser.Scene {
     this.pois = parsePOIs(map);
     resetWanderClock();
     this.initDoors();
-    this.initBossSeat(bossSpawn);
-    this.initInteractionUI();
     this.initGameEvents();
-    gameEvents.emit("seats-discovered", workerSpawns);
+    gameEvents.emit("seats-discovered", allSpawns);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
     this.events.once(Phaser.Scenes.Events.DESTROY, () => this.cleanup());
@@ -312,6 +308,9 @@ export class OfficeScene extends Phaser.Scene {
       seat.label,
       initialFacing,
     );
+    // Apply alien/celestial tint from agent config
+    const agentConfig = WORKER_SPRITES.find(ws => ws.key === seat.spriteKey || seat.spriteKey === "character_04_pulse" && ws.key === "character_04_pulse");
+    if (agentConfig) worker.sprite.setTint(agentConfig.tint);
     worker.setPOIs(this.pois);
     worker.setPathfinder(this.pathfinder);
     worker.sprite.setCollideWorldBounds(true);
@@ -661,55 +660,10 @@ export class OfficeScene extends Phaser.Scene {
   // ── Update ─────────────────────────────────────────────
 
   update() {
-    if (this.interactionMenu.visible) {
-      this.interactionMenu.update();
-      for (const worker of this.workers) worker.update();
-      return;
-    }
-
-    if (this.terminalOpen || isInputFocused()) {
-      for (const worker of this.workers) worker.update();
-      this.updateDoors();
-      return;
-    }
-
-    this.player.update();
-    if (!this.cameraFollowing && this.player.isMoving()) {
-      this.resumeCameraFollow();
-    }
     for (const worker of this.workers) worker.update();
     this.updateDoors();
-
-    // Worker proximity detection
-    const nearest = this.findNearestWorker();
-
-    if (nearest !== this.nearestWorker) {
-      if (this.nearestWorker) this.nearestWorker.resume();
-      this.nearestWorker = nearest;
-    }
-
-    if (this.workerPromptText) {
-      if (nearest) {
-        nearest.pause();
-        this.workerPromptText.setPosition(
-          nearest.sprite.x,
-          nearest.sprite.y - FRAME_HEIGHT * PROMPT_Y_OFFSET,
-        );
-        this.workerPromptText.setVisible(true);
-      } else {
-        this.workerPromptText.setVisible(false);
-      }
-    }
-
-    // E key: worker menu takes priority over boss terminal
-    if (nearest && Phaser.Input.Keyboard.JustDown(this.eKey)) {
-      this.openWorkerMenu(nearest);
-      if (this.workerPromptText) this.workerPromptText.setVisible(false);
-      return;
-    }
-
-    // Boss terminal interaction (only when no worker is nearby)
-    if (!nearest && this.terminalZone && this.promptText) {
+    // stub to silence TS — dead code below never executes
+    if (false) {
       const dist = Phaser.Math.Distance.Between(
         this.player.sprite.x, this.player.sprite.y,
         this.terminalZone.x, this.terminalZone.y,
