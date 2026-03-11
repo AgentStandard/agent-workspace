@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Removed "standalone" — incompatible with `next start`, causes redirect loops
 };
 
 export default nextConfig;
