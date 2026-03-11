@@ -306,11 +306,17 @@ export class OfficeScene extends Phaser.Scene {
       initialFacing,
     );
     // Apply alien/celestial tint from agent config
-    const agentConfig = WORKER_SPRITES.find(ws => ws.key === seat.spriteKey || seat.spriteKey === "character_04_pulse" && ws.key === "character_04_pulse");
+    const agentConfig = WORKER_SPRITES.find(ws => ws.key === seat.spriteKey);
     if (agentConfig) worker.sprite.setTint(agentConfig.tint);
     worker.setPOIs(this.pois);
     worker.setPathfinder(this.pathfinder);
     worker.sprite.setCollideWorldBounds(true);
+
+    // Aspera: angelic halo + ascending light particles
+    if (seat.label === "Aspera") {
+      this.addAsperaHalo(worker);
+    }
+
     return worker;
   }
 
@@ -570,7 +576,89 @@ export class OfficeScene extends Phaser.Scene {
     return this.workers.find((worker) => worker.status === "idle") ?? null;
   }
 
-  // ── Boss seat ──────────────────────────────────────────
+  // ── Aspera angelic effects ──────────────────────────────
+
+  private addAsperaHalo(worker: import("../entities/Worker").Worker) {
+    // Pure white — angelic, luminous
+    worker.sprite.setTint(0xFFFFFF);
+    worker.sprite.setAlpha(0.95);
+
+    const scene = this;
+
+    // Gold halo ring above head, pulsing opacity
+    const halo = scene.add.graphics();
+    halo.setDepth(6);
+    const drawHalo = (alpha: number) => {
+      halo.clear();
+      halo.lineStyle(2, 0xFFD966, alpha);
+      halo.strokeCircle(0, 0, 14);
+      halo.lineStyle(1, 0xFFFFAA, alpha * 0.5);
+      halo.strokeCircle(0, 0, 18);
+    };
+    drawHalo(0.9);
+
+    // Soft radial glow behind sprite
+    const glow = scene.add.graphics();
+    glow.setDepth(4);
+    const drawGlow = (alpha: number) => {
+      glow.clear();
+      glow.fillStyle(0xFFFFFF, alpha * 0.12);
+      glow.fillCircle(0, 0, 32);
+      glow.fillStyle(0xFFEEAA, alpha * 0.07);
+      glow.fillCircle(0, 0, 46);
+    };
+    drawGlow(1);
+
+    // Ascending light motes — small gold+white dots float upward from her feet
+    const moteCount = 7;
+    const motes: Array<{ g: Phaser.GameObjects.Graphics; ox: number; phase: number; speed: number }> = [];
+    for (let i = 0; i < moteCount; i++) {
+      const g = scene.add.graphics();
+      g.setDepth(7);
+      g.fillStyle(i % 2 === 0 ? 0xFFFFFF : 0xFFD966, 0.9);
+      g.fillCircle(0, 0, i % 3 === 0 ? 2 : 1.5);
+      motes.push({
+        g,
+        ox: (Math.random() - 0.5) * 28,
+        phase: (i / moteCount) * Math.PI * 2,
+        speed: 0.38 + Math.random() * 0.3,
+      });
+    }
+
+    let tick = 0;
+    const onUpdate = () => {
+      if (!worker.sprite?.active) return;
+      const sx = worker.sprite.x;
+      const sy = worker.sprite.y;
+      tick += 0.04;
+      const pulse = 0.65 + Math.sin(tick * 2) * 0.35;
+
+      halo.setPosition(sx, sy - 54);
+      drawHalo(pulse);
+
+      glow.setPosition(sx, sy - 20);
+      drawGlow(pulse);
+
+      for (const mote of motes) {
+        mote.phase += mote.speed * 0.04;
+        const rise = (mote.phase * 30) % 72;
+        const moteY = sy - 10 - rise;
+        const wobble = Math.sin(mote.phase * 2.1) * 6;
+        mote.g.setPosition(sx + mote.ox + wobble, moteY);
+        mote.g.setAlpha((1 - rise / 72) * 0.85);
+      }
+    };
+
+    scene.events.on("update", onUpdate);
+    scene.events.once("shutdown", () => {
+      scene.events.off("update", onUpdate);
+      halo.destroy();
+      glow.destroy();
+      for (const m of motes) m.g.destroy();
+    });
+  }
+
+  // ── Doors ──────────────────────────────────────────────
 
   private initDoors() {
     const doorPositions = [
